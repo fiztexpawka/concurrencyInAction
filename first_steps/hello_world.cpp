@@ -1,6 +1,11 @@
 #include <iostream>
 #include <thread>
 #include <string>
+#include <cstddef>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <chrono>
 
 class thread_guard {
 public:
@@ -33,9 +38,28 @@ void cout_word(const std::string& word)
     std::cout << word << std::endl;
 }
 
+bool badCommunicator = false;
+
+template<class T>
+void async_generate_sequence(std::vector<T>& data)
+{
+    const std::ptrdiff_t size = 1000;
+    data.resize(size, T());
+    std::iota(std::begin(data), std::end(data), 10);
+    badCommunicator = true;
+}
+
+template<class T>
+void async_sort(std::vector<T>& data)
+{
+    while (!badCommunicator) {
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
+    std::sort(std::begin(data), std::end(data), std::greater<T>());
+}
+
 int main()
 {
-
     std::thread t(hello);
     std::thread t2([]() {
         std::cout << "Hello from lambda!\n";
@@ -49,6 +73,14 @@ int main()
     }
     thread_guard guard(std::thread{hello});
     t3.join();
+
+    std::vector<int> data;
+    thread_guard generator{std::thread{async_generate_sequence<int>, std::ref(data)}};
+    std::thread sorter_thread{async_sort<int>, std::ref(data)};
+
+    sorter_thread.join();
+    std::cout << "size: " << data.size() << " is sorted: " <<
+        (std::is_sorted(std::begin(data), std::end(data), std::greater<int>()) ? "True\n" : "False\n");
 
     return 0;
 }
