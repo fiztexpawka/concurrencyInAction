@@ -1,5 +1,6 @@
 #include <iostream>
 #include <thread>
+#include <string>
 
 class thread_guard {
 public:
@@ -27,6 +28,11 @@ void hello()
     std::cout << "Hello, Concurrent World!\n";
 }
 
+void cout_word(const std::string& word)
+{
+    std::cout << word << std::endl;
+}
+
 int main()
 {
 
@@ -34,6 +40,7 @@ int main()
     std::thread t2([]() {
         std::cout << "Hello from lambda!\n";
     });
+    std::thread t3(cout_word, "the best words");
     try {
         throw 0;
     } catch (...) {
@@ -41,6 +48,7 @@ int main()
         t2.join();
     }
     thread_guard guard(std::thread{hello});
+    t3.join();
 
     return 0;
 }
