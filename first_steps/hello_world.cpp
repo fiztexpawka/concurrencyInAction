@@ -38,7 +38,7 @@ void cout_word(const std::string& word)
     std::cout << word << std::endl;
 }
 
-bool badCommunicator = false;
+std::atomic<bool> badCommunicator = {false};
 
 template<class T>
 void async_generate_sequence(std::vector<T>& data)
