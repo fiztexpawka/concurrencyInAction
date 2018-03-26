@@ -11,7 +11,11 @@ class thread_guard {
 public:
     explicit thread_guard(std::thread t) :
         t_(std::move(t))
-    {}
+    {
+        if (!t_.joinable()) {
+            throw std::logic_error("You have no logic to pass this");
+        }
+    }
 
     ~thread_guard()
     {
