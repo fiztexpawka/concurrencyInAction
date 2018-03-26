@@ -62,6 +62,22 @@ void async_sort(std::vector<T>& data)
     std::sort(std::begin(data), std::end(data), std::greater<T>());
 }
 
+// Strange struct :)
+struct SomeData {
+    SomeData(int initialValue = 42);
+
+    void operator() ()
+    {
+        std::cout << curValue_ << std::endl;
+    }
+
+    int curValue_;
+};
+
+SomeData::SomeData(const int initialValue) :
+    curValue_(initialValue)
+{}
+
 int main()
 {
     std::thread t(hello);
@@ -81,7 +97,7 @@ int main()
     std::vector<int> data;
     thread_guard generator{std::thread{async_generate_sequence<int>, std::ref(data)}};
     std::thread sorter_thread{async_sort<int>, std::ref(data)};
-
+    thread_guard write_magic{std::thread(SomeData(45))};
     sorter_thread.join();
     std::cout << "size: " << data.size() << " is sorted: " <<
         (std::is_sorted(std::begin(data), std::end(data), std::greater<int>()) ? "True\n" : "False\n");
