@@ -78,6 +78,7 @@ SomeData::SomeData(const int initialValue) :
 
 int main()
 {
+    std::cout << "Best number of threads: " << std::thread::hardware_concurrency() << std::endl;
     std::thread t(hello);
     std::thread t2([]() {
         std::cout << "Hello from lambda!\n";
