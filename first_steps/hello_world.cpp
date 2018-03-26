@@ -19,9 +19,7 @@ public:
 
     ~thread_guard()
     {
-        if (t_.joinable()) {
-            t_.join();
-        }
+        t_.join();
     }
 
     thread_guard(const thread_guard& guard) = delete;
@@ -64,7 +62,7 @@ void async_sort(std::vector<T>& data)
 
 // Strange struct :)
 struct SomeData {
-    SomeData(int initialValue = 42);
+    explicit SomeData(int initialValue = 42);
 
     void operator() ()
     {
@@ -101,6 +99,12 @@ int main()
     sorter_thread.join();
     std::cout << "size: " << data.size() << " is sorted: " <<
         (std::is_sorted(std::begin(data), std::end(data), std::greater<int>()) ? "True\n" : "False\n");
+
+    std::vector<std::thread> thread_collection;
+    for (int i = 0; i < 10; i++) {
+        thread_collection.push_back(std::thread{SomeData(i)});
+    }
+    std::for_each(std::begin(thread_collection), std::end(thread_collection), std::mem_fn(&std::thread::join));
 
     return 0;
 }
