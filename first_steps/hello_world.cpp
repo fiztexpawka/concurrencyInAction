@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <numeric>
 #include <chrono>
+#include <sstream>
+#include <mutex>
 
 class thread_guard {
 public:
@@ -29,10 +31,17 @@ private:
     std::thread t_;
 };
 
+std::mutex OutputMutex;
 
 void hello()
 {
+    OutputMutex.lock();
     std::cout << "Hello, Concurrent World!\n";
+    OutputMutex.unlock();
+    std::unique_lock<std::mutex> guard(OutputMutex);
+    guard.unlock();
+    guard.lock(); // with lock guard it is impossible
+    std::lock_guard<std::mutex> guard2(OutputMutex);
 }
 
 void cout_word(const std::string& word)
@@ -66,7 +75,9 @@ struct SomeData {
 
     void operator() ()
     {
-        std::cout << curValue_ << std::endl;
+        std::stringstream ss;
+        ss << "thread id: " << std::this_thread::get_id() << " " << curValue_ << std::endl;
+        std::cout << ss.str();
     }
 
     int curValue_;
@@ -103,7 +114,7 @@ int main()
 
     std::vector<std::thread> thread_collection;
     for (int i = 0; i < 10; i++) {
-        thread_collection.push_back(std::thread{SomeData(i)});
+        thread_collection.push_back(std::thread{SomeData(i)}); // much better just to emplace back
     }
     std::for_each(std::begin(thread_collection), std::end(thread_collection), std::mem_fn(&std::thread::join));
 

@@ -1,6 +1,6 @@
-all: super_hello
+all: super_hello.o
 
-CFLAGS=-std=c++14
+CFLAGS=-std=c++1z
 
 super_hello: hello_world.o
 	g++ hello_world.o $(CFLAGS) -o super_hello
