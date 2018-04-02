@@ -41,6 +41,7 @@ void hello()
     std::unique_lock<std::mutex> guard(OutputMutex);
     guard.unlock();
     guard.lock(); // with lock guard it is impossible
+    guard.unlock();
     std::lock_guard<std::mutex> guard2(OutputMutex);
 }
 
